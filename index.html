@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="icon" href="data:,">
+    <title>Specimen Zero - Web Reborn</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="game-container"></div>
+
+    <div id="ui-overlay">
+      <div id="danger-vignette"></div>
+
+      <!-- HUD em jogo -->
+      <div id="hud" class="hidden">
+        <div id="crosshair"></div>
+        <div id="interact-prompt">[E] INTERAGIR</div>
+        
+        <div id="stats-box">
+          <div id="room-display">OBJETIVO: ENCONTRE A CHAVE DA SA?DA</div>
+          <div id="ammo-display">DARDOS: 3 / 3</div>
+          <div id="key-display">CHAVES: NENHUMA</div>
+          <div id="threat-level">AMEA?A: NORMAL</div>
+        </div>
+
+        <button id="btn-fullscreen" class="glass-btn">TELA CHEIA</button>
+        <button id="btn-backpack" class="backpack-btn">MOCHILA [TAB]</button>
+        <button id="btn-toggle-cctv" class="cctv-hud-btn">CAMERAS [C]</button>
+
+        <div id="touch-controls">
+          <div id="joystick-left" class="joy-zone">
+            <div id="knob-left" class="joy-knob"></div>
+          </div>
+          <div id="joystick-right" class="joy-zone">
+            <div id="knob-right" class="joy-knob"></div>
+          </div>
+          <button id="btn-touch-interact">INTERAGIR</button>
+          <button id="btn-touch-shoot">ATIRAR</button>
+          <button id="btn-touch-bag">MOCHILA</button>
+          <button id="btn-touch-cctv">CCTV</button>
+        </div>
+      </div>
+
+      <!-- TELA FINAL: VOC? ESCAPOU! -->
+      <div id="escaped-screen" class="hidden">
+        <div class="escaped-card">
+          <h1 class="escaped-title">VOC? ESCAPOU!</h1>
+          <p class="escaped-subtitle">Voc? conseguiu abrir a porta de seguran?a e fugiu do esp?cime com vida.</p>
+          <button id="btn-restart" class="btn btn-primary">JOGAR NOVAMENTE</button>
+        </div>
+      </div>
+
+      <!-- MOCHILA / INVENT?RIO T?TICO (TAB) -->
+      <div id="backpack-modal" class="hidden">
+        <div class="backpack-card">
+          <div class="backpack-header">
+            <h2>INVENT?RIO DE FUGA</h2>
+            <button id="btn-close-bag" class="close-bag-btn">FECHAR [TAB/ESC]</button>
+          </div>
+          <div class="slots-grid">
+            <div class="slot active-slot">
+              <span class="slot-badge">EQUIPADA</span>
+              <div class="slot-icon">??</div>
+              <div class="slot-name">Pistola Sedativa</div>
+              <div id="bag-ammo-count" class="slot-count">3 Dardos</div>
+            </div>
+            <div class="slot">
+              <div class="slot-icon">??</div>
+              <div class="slot-name">Lanterna T?tica</div>
+              <div class="slot-count">100% Carga</div>
+            </div>
+            <div class="slot" id="slot-red-key">
+              <div class="slot-icon">??</div>
+              <div class="slot-name">Chave de Cirurgia</div>
+              <div id="status-red-key" class="slot-count">N?o Encontrada</div>
+            </div>
+            <div class="slot" id="slot-card-key">
+              <div class="slot-icon">??</div>
+              <div class="slot-name">Cart?o Farm?cia</div>
+              <div id="status-card-key" class="slot-count">N?o Encontrada</div>
+            </div>
+            <div class="slot" id="slot-master-key">
+              <div class="slot-icon">???</div>
+              <div class="slot-name">Chave da Sa?da</div>
+              <div id="status-master-key" class="slot-count">N?o Encontrada</div>
+            </div>
+          </div>
+          <p class="bag-tip">Procure itens dentro dos arm?rios e camas para destrancar a porta final!</p>
+        </div>
+      </div>
+
+      <!-- MONITOR CCTV -->
+      <div id="cctv-overlay" class="hidden">
+        <div class="cctv-scanlines"></div>
+        <div class="cctv-header">
+          <div class="rec-indicator"><span class="rec-dot"></span> GRAVANDO [REC]</div>
+          <div id="cctv-cam-title">CAM 01 // SAGU?O</div>
+          <div id="cctv-timestamp">00:00:00</div>
+        </div>
+
+        <div class="cctv-controls">
+          <button id="btn-cam-prev" class="cam-btn">&lt; ANTERIOR</button>
+          <button id="btn-cam-exit" class="cam-btn cam-btn-exit">VOLTAR AO JOGADOR [C / ESC]</button>
+          <button id="btn-cam-next" class="cam-btn">PROXIMA &gt;</button>
+        </div>
+      </div>
+
+      <!-- Menu Principal / Lobby -->
+      <div id="menu-screen">
+        <div class="menu-card">
+          <h1 class="glitch-text">SPECIMEN ZERO</h1>
+          <p class="tagline">ESCAPE DO HOSPITAL // ENCONTRE AS CHAVES</p>
+
+          <div class="form-group">
+            <input type="text" id="room-code" placeholder="C?DIGO DA SALA (ex: 808)" maxlength="12" autocomplete="off" />
+          </div>
+
+          <div class="btn-group">
+            <button id="btn-host" class="btn btn-primary">CRIAR SALA (HOST)</button>
+            <button id="btn-join" class="btn btn-secondary">ENTRAR EM SALA</button>
+            <button id="btn-solo" class="btn btn-dark">EXPLORA??O SOLO</button>
+          </div>
+
+          <div id="status-message"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

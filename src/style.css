@@ -1,0 +1,586 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: 'Consolas', 'Courier New', monospace;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #020403;
+}
+
+#game-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+#ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+#danger-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 100px rgba(220, 38, 38, 0);
+  transition: box-shadow 0.2s ease-out;
+}
+
+#menu-screen {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(13, 24, 20, 0.95) 0%, rgba(2, 4, 3, 0.98) 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.menu-card {
+  width: 90%;
+  max-width: 440px;
+  background: rgba(10, 16, 14, 0.85);
+  border: 1px solid #1f3d32;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 10px rgba(16, 185, 129, 0.1);
+  padding: 36px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.glitch-text {
+  color: #ef4444;
+  font-size: 2.2rem;
+  letter-spacing: 5px;
+  text-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
+  margin-bottom: 6px;
+}
+
+.tagline {
+  color: #6ee7b7;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  margin-bottom: 28px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 14px;
+  background: rgba(4, 8, 6, 0.9);
+  border: 1px solid #1f3d32;
+  color: #f9fafb;
+  font-size: 1.1rem;
+  text-align: center;
+  outline: none;
+  letter-spacing: 3px;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+
+input[type="text"]:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #b91c1c;
+  color: #ffffff;
+}
+.btn-primary:hover {
+  background: #dc2626;
+  box-shadow: 0 0 15px rgba(220, 38, 38, 0.6);
+}
+
+.btn-secondary {
+  background: #0f2e24;
+  color: #6ee7b7;
+  border: 1px solid #1f5f4b;
+}
+.btn-secondary:hover {
+  background: #144234;
+}
+
+.btn-dark {
+  background: transparent;
+  color: #9ca3af;
+  border: 1px dashed #374151;
+}
+.btn-dark:hover {
+  background: #111827;
+  color: #ffffff;
+}
+
+#status-message {
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: #f87171;
+  min-height: 20px;
+}
+
+#crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background-color: rgba(56, 189, 248, 0.8);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+}
+
+#interact-prompt {
+  display: none;
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #38bdf8;
+  color: #f3f4f6;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+}
+
+#stats-box {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  background: rgba(3, 7, 5, 0.75);
+  border-left: 3px solid #38bdf8;
+  padding: 10px 16px;
+  color: #d1d5db;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+#ammo-display {
+  color: #38bdf8;
+  font-weight: bold;
+}
+
+#key-display {
+  color: #facc15;
+  font-weight: bold;
+}
+
+.glass-btn {
+  pointer-events: auto;
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #374151;
+  color: #e5e7eb;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.backpack-btn {
+  pointer-events: auto;
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 2px solid #10b981;
+  color: #6ee7b7;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+.backpack-btn:hover {
+  background: #047857;
+  color: #fff;
+}
+
+.cctv-hud-btn {
+  pointer-events: auto;
+  position: absolute;
+  bottom: 24px;
+  left: 200px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 2px solid #3b82f6;
+  color: #60a5fa;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+.cctv-hud-btn:hover {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+/* TELA VOC? ESCAPOU */
+#escaped-screen {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.94);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.escaped-card {
+  text-align: center;
+  max-width: 500px;
+  padding: 40px;
+}
+
+.escaped-title {
+  color: #22c55e;
+  font-size: 3rem;
+  letter-spacing: 6px;
+  text-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
+  margin-bottom: 16px;
+}
+
+.escaped-subtitle {
+  color: #d1d5db;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+/* MODAL DA MOCHILA */
+#backpack-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 7, 5, 0.88);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 55;
+  pointer-events: auto;
+}
+
+.backpack-card {
+  width: 90%;
+  max-width: 620px;
+  background: rgba(10, 16, 14, 0.95);
+  border: 1px solid #1f5f4b;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+.backpack-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #1f3d32;
+  padding-bottom: 12px;
+}
+
+.backpack-header h2 {
+  color: #10b981;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+.close-bag-btn {
+  background: #991b1b;
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.slot {
+  background: rgba(17, 24, 21, 0.8);
+  border: 1px solid #1f3d32;
+  border-radius: 6px;
+  padding: 14px;
+  text-align: center;
+  position: relative;
+}
+
+.active-slot {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+.slot-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #0284c7;
+  color: white;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.slot-icon {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+
+.slot-name {
+  color: #f3f4f6;
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.slot-count {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.bag-tip {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  text-align: center;
+  font-style: italic;
+}
+
+/* SISTEMA CCTV */
+#cctv-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
+}
+
+.cctv-scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.04));
+  background-size: 100% 4px, 6px 100%;
+}
+
+.cctv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(5, 10, 8, 0.7);
+  padding: 12px 20px;
+  border: 1px solid #1f3d32;
+  border-radius: 4px;
+}
+
+.rec-indicator {
+  color: #ef4444;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rec-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: blink 1s infinite alternate;
+}
+
+@keyframes blink {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+#cctv-cam-title {
+  color: #6ee7b7;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+}
+
+#cctv-timestamp {
+  color: #9ca3af;
+}
+
+.cctv-controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.cam-btn {
+  background: rgba(10, 20, 16, 0.85);
+  border: 1px solid #10b981;
+  color: #6ee7b7;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+}
+
+.cam-btn:hover {
+  background: #10b981;
+  color: #000;
+}
+
+.cam-btn-exit {
+  border-color: #ef4444;
+  color: #f87171;
+}
+
+.cam-btn-exit:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* Mobile */
+#touch-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  pointer-events: auto;
+  display: none;
+}
+
+.joy-zone {
+  position: absolute;
+  bottom: 30px;
+  width: 130px;
+  height: 130px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+}
+
+#joystick-left { left: 30px; }
+#joystick-right { right: 30px; }
+
+.joy-knob {
+  position: absolute;
+  top: 45px;
+  left: 45px;
+  width: 40px;
+  height: 40px;
+  background: rgba(56, 189, 248, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+#btn-touch-interact {
+  position: absolute;
+  right: 175px;
+  bottom: 35px;
+  width: 65px;
+  height: 65px;
+  background: rgba(56, 189, 248, 0.6);
+  border: 2px solid #38bdf8;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+#btn-touch-shoot {
+  position: absolute;
+  right: 100px;
+  bottom: 110px;
+  width: 65px;
+  height: 65px;
+  background: rgba(239, 68, 68, 0.7);
+  border: 2px solid #ef4444;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+#btn-touch-bag {
+  position: absolute;
+  right: 175px;
+  bottom: 110px;
+  width: 65px;
+  height: 65px;
+  background: rgba(16, 185, 129, 0.6);
+  border: 2px solid #10b981;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+#btn-touch-cctv {
+  position: absolute;
+  right: 250px;
+  bottom: 35px;
+  width: 65px;
+  height: 65px;
+  background: rgba(59, 130, 246, 0.6);
+  border: 2px solid #3b82f6;
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
