@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/jogo-de-terror/',
-  css: {
-    postcss: {}
+  base: './',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets'
   },
   server: {
     host: true,
