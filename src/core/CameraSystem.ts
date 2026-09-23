@@ -5,6 +5,7 @@ export interface SecurityCam {
   name: string;
   camera: THREE.PerspectiveCamera;
   baseYaw: number;
+  basePitch: number;
 }
 
 export class CameraSystem {
@@ -15,34 +16,40 @@ export class CameraSystem {
   constructor(private scene: THREE.Scene) {}
 
   public addCamera(id: string, name: string, pos: THREE.Vector3, lookAtTarget: THREE.Vector3): void {
-    const cam = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 70);
+    // FOV de 82 graus para simular lente grande-angular / olho de peixe de CCTV
+    const cam = new THREE.PerspectiveCamera(82, window.innerWidth / window.innerHeight, 0.1, 70);
     cam.position.copy(pos);
     cam.lookAt(lookAtTarget);
 
-    const dir = new THREE.Vector3().subVectors(lookAtTarget, pos);
-    const baseYaw = Math.atan2(-dir.x, -dir.z);
-
-    // Cria a carca?a visual da c?mara de seguran?a presa no teto/parede
-    const housingMat = new THREE.MeshStandardMaterial({ color: 0x1c1c1c, metalness: 0.8, roughness: 0.3 });
-    const housing = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.2, 0.4), housingMat);
+    // Carca?a f?sica presa na quina do teto
+    const housingMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.85, roughness: 0.25 });
+    const housing = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.22, 0.45), housingMat);
     housing.position.copy(pos);
     housing.lookAt(lookAtTarget);
 
-    // LED vermelho de grava??o piscante
-    const led = new THREE.Mesh(
-      new THREE.SphereGeometry(0.03, 8, 8),
-      new THREE.MeshBasicMaterial({ color: 0xff0000 })
+    const dome = new THREE.Mesh(
+      new THREE.SphereGeometry(0.1, 12, 12),
+      new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.9, roughness: 0.1 })
     );
-    led.position.set(0, -0.05, 0.2);
+    dome.position.set(0, -0.06, 0.15);
+    housing.add(dome);
+
+    const led = new THREE.Mesh(
+      new THREE.SphereGeometry(0.025, 8, 8),
+      new THREE.MeshBasicMaterial({ color: 0xef4444 })
+    );
+    led.position.set(0.09, -0.05, 0.22);
     housing.add(led);
 
     this.scene.add(housing);
 
+    cam.rotation.order = 'YXZ';
     this.cameras.push({
       id,
       name,
       camera: cam,
-      baseYaw
+      baseYaw: cam.rotation.y,
+      basePitch: cam.rotation.x
     });
   }
 
@@ -62,11 +69,12 @@ export class CameraSystem {
   }
 
   public update(time: number): void {
-    // Oscila??o suave de seguran?a (Pan da c?mara)
     if (this.isViewingCCTV && this.cameras[this.activeCamIndex]) {
       const active = this.cameras[this.activeCamIndex];
-      const panOffset = Math.sin(time * 0.8) * 0.35;
+      // Oscila??o suave horizontal sem perder o ?ngulo voltado para o ch?o
+      const panOffset = Math.sin(time * 0.9) * 0.22;
       active.camera.rotation.y = active.baseYaw + panOffset;
+      active.camera.rotation.x = active.basePitch;
     }
   }
 }
