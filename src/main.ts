@@ -33,7 +33,6 @@ let isGameOver = false;
 let heartbeatTimer = 0;
 const clock = new THREE.Clock();
 
-// Invent?rio de Chaves Coletadas
 const inventoryKeys: Set<string> = new Set();
 
 const raycaster = new THREE.Raycaster();
@@ -45,8 +44,13 @@ let targetedItem: CollectibleItem | null = null;
 const backpackModal = document.getElementById('backpack-modal')!;
 const btnBackpack = document.getElementById('btn-backpack')!;
 const btnCloseBag = document.getElementById('btn-close-bag')!;
-const btnTouchBag = document.getElementById('btn-touch-bag');
-const btnTouchShoot = document.getElementById('btn-touch-shoot');
+const btnTouchBag = document.getElementById('btn-touch-bag')!;
+const btnTouchShoot = document.getElementById('btn-touch-shoot')!;
+const btnTouchInteract = document.getElementById('btn-touch-interact')!;
+const btnTouchCCTV = document.getElementById('btn-touch-cctv')!;
+const touchControls = document.getElementById('touch-controls')!;
+const rotateScreen = document.getElementById('rotate-device-screen')!;
+
 const ammoDisplay = document.getElementById('ammo-display')!;
 const keyDisplay = document.getElementById('key-display')!;
 const escapedScreen = document.getElementById('escaped-screen')!;
@@ -59,7 +63,41 @@ const btnToggleCCTV = document.getElementById('btn-toggle-cctv')!;
 const btnCamPrev = document.getElementById('btn-cam-prev')!;
 const btnCamNext = document.getElementById('btn-cam-next')!;
 const btnCamExit = document.getElementById('btn-cam-exit')!;
-const btnTouchCCTV = document.getElementById('btn-touch-cctv');
+
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+if (isTouchDevice) {
+  touchControls.style.display = 'block';
+}
+
+// 1. AUTO FULLSCREEN & ORIENTA??O HORIZONTAL (Landscape)
+async function requestAutoLandscapeFullscreen() {
+  try {
+    if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen().catch(() => {});
+    }
+    // Trava em modo paisagem se a API estiver dispon?vel no navegador
+    if (screen.orientation && 'lock' in screen.orientation) {
+      // @ts-ignore
+      await screen.orientation.lock('landscape').catch(() => {});
+    }
+  } catch (_) {}
+}
+
+function checkOrientation() {
+  if (isTouchDevice) {
+    const isPortrait = window.innerHeight > window.innerWidth;
+    if (isPortrait) {
+      rotateScreen.classList.remove('hidden');
+    } else {
+      rotateScreen.classList.add('hidden');
+    }
+  }
+}
+
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', checkOrientation);
+checkOrientation();
 
 function updateKeyHUD() {
   const keysList: string[] = [];
@@ -68,7 +106,6 @@ function updateKeyHUD() {
   if (inventoryKeys.has('master_key')) keysList.push('SA?DA');
   keyDisplay.innerText = `CHAVES: ${keysList.length > 0 ? keysList.join(', ') : 'NENHUMA'}`;
 
-  // Atualiza slots da mochila
   const slotRed = document.getElementById('status-red-key')!;
   const slotCard = document.getElementById('status-card-key')!;
   const slotMaster = document.getElementById('status-master-key')!;
@@ -96,7 +133,7 @@ function toggleBackpack(open?: boolean) {
     document.exitPointerLock();
   } else {
     backpackModal.classList.add('hidden');
-    if (ui.menuScreen.classList.contains('hidden') && !camSystem.isViewingCCTV) {
+    if (ui.menuScreen.classList.contains('hidden') && !camSystem.isViewingCCTV && !isTouchDevice) {
       engine.renderer.domElement.requestPointerLock();
     }
   }
@@ -104,7 +141,7 @@ function toggleBackpack(open?: boolean) {
 
 btnBackpack.addEventListener('click', () => toggleBackpack(true));
 btnCloseBag.addEventListener('click', () => toggleBackpack(false));
-btnTouchBag?.addEventListener('click', () => toggleBackpack());
+btnTouchBag.addEventListener('click', (e) => { e.stopPropagation(); toggleBackpack(); });
 
 function toggleCCTV(enable?: boolean) {
   if (isGameOver) return;
@@ -117,7 +154,7 @@ function toggleCCTV(enable?: boolean) {
     }
   } else {
     cctvOverlay.classList.add('hidden');
-    if (ui.menuScreen.classList.contains('hidden') && !isBackpackOpen) {
+    if (ui.menuScreen.classList.contains('hidden') && !isBackpackOpen && !isTouchDevice) {
       engine.renderer.domElement.requestPointerLock();
     }
   }
@@ -125,7 +162,7 @@ function toggleCCTV(enable?: boolean) {
 
 btnToggleCCTV.addEventListener('click', () => toggleCCTV(true));
 btnCamExit.addEventListener('click', () => toggleCCTV(false));
-btnTouchCCTV?.addEventListener('click', () => toggleCCTV());
+btnTouchCCTV.addEventListener('click', (e) => { e.stopPropagation(); toggleCCTV(); });
 
 btnCamNext.addEventListener('click', () => {
   camSystem.nextCamera();
@@ -137,11 +174,9 @@ btnCamPrev.addEventListener('click', () => {
   cctvTitle.innerText = camSystem.cameras[camSystem.activeCamIndex].name;
 });
 
-// A??es de Intera??o (Coleta de itens, portas ou arm?rios)
 function tryInteract() {
   if (isGameOver) return;
 
-  // 1. Coleta de Item (Chave / Cart?o)
   if (targetedItem && !targetedItem.isCollected) {
     inventoryKeys.add(targetedItem.type);
     targetedItem.collect(engine.scene);
@@ -149,15 +184,12 @@ function tryInteract() {
     return;
   }
 
-  // 2. Intera??o com Porta
   if (targetedDoor) {
     if (targetedDoor.isLocked) {
       if (targetedDoor.requiredKey && inventoryKeys.has(targetedDoor.requiredKey)) {
         targetedDoor.unlock();
         map.rebuildColliders();
-        if (targetedDoor.isExitDoor) {
-          triggerEscape();
-        }
+        if (targetedDoor.isExitDoor) triggerEscape();
       }
     } else {
       if (targetedDoor.isExitDoor && !targetedDoor.isOpen) {
@@ -174,7 +206,6 @@ function tryInteract() {
     return;
   }
 
-  // 3. Intera??o com Arm?rio
   if (targetedCabinet) {
     targetedCabinet.toggle();
     return;
@@ -190,19 +221,21 @@ function handleShoot() {
   }
 }
 
-btnTouchShoot?.addEventListener('click', () => handleShoot());
+btnTouchShoot.addEventListener('click', (e) => {
+  e.stopPropagation();
+  handleShoot();
+});
 
+btnTouchInteract.addEventListener('click', (e) => {
+  e.stopPropagation();
+  tryInteract();
+});
+
+// Teclado (PC)
 window.addEventListener('keydown', (e) => {
   if (isGameOver) return;
-  if (e.code === 'Tab') {
-    e.preventDefault();
-    toggleBackpack();
-    return;
-  }
-  if (e.code === 'KeyC') {
-    toggleCCTV();
-    return;
-  }
+  if (e.code === 'Tab') { e.preventDefault(); toggleBackpack(); return; }
+  if (e.code === 'KeyC') { toggleCCTV(); return; }
   if (e.code === 'Escape') {
     if (isBackpackOpen) { toggleBackpack(false); return; }
     if (camSystem.isViewingCCTV) { toggleCCTV(false); return; }
@@ -222,8 +255,9 @@ window.addEventListener('keyup', (e) => {
   if (['KeyA', 'KeyD', 'ArrowLeft', 'ArrowRight'].includes(e.code)) player.moveState.right = 0;
 });
 
+// Mouse (PC)
 engine.renderer.domElement.addEventListener('mousedown', (e) => {
-  if (isGameOver || isBackpackOpen || camSystem.isViewingCCTV) return;
+  if (isTouchDevice || isGameOver || isBackpackOpen || camSystem.isViewingCCTV) return;
   if (ui.menuScreen.classList.contains('hidden')) {
     if (!isPointerLocked) {
       engine.renderer.domElement.requestPointerLock();
@@ -240,8 +274,6 @@ engine.renderer.domElement.addEventListener('mousedown', (e) => {
   }
 });
 
-document.getElementById('btn-touch-interact')?.addEventListener('click', () => tryInteract());
-
 document.addEventListener('pointerlockchange', () => {
   isPointerLocked = document.pointerLockElement === engine.renderer.domElement;
 });
@@ -253,63 +285,96 @@ document.addEventListener('mousemove', (e) => {
   player.rotation.pitch = Math.max(-Math.PI / 2.3, Math.min(Math.PI / 2.3, player.rotation.pitch));
 });
 
-if ('ontouchstart' in window) {
-  function setupJoy(zoneId: string, knobId: string, onMove: (x: number, y: number) => void, onEnd: () => void) {
-    const zone = document.getElementById(zoneId)!;
-    const knob = document.getElementById(knobId)!;
-    let tId: number | null = null;
-    let startX = 0;
-    let startY = 0;
+// =========================================================
+// SISTEMA TOUCH NATIVO (Mobile)
+// =========================================================
+if (isTouchDevice) {
+  // 1. Joystick Esquerdo: Movimenta??o
+  const joyZone = document.getElementById('joystick-left')!;
+  const knob = document.getElementById('knob-left')!;
+  let moveTouchId: number | null = null;
+  let startX = 0;
+  let startY = 0;
 
-    zone.addEventListener('touchstart', (e) => {
-      audio.init();
-      const t = e.changedTouches[0];
-      tId = t.identifier;
-      startX = t.clientX;
-      startY = t.clientY;
-    });
+  joyZone.addEventListener('touchstart', (e) => {
+    audio.init();
+    const t = e.changedTouches[0];
+    moveTouchId = t.identifier;
+    startX = t.clientX;
+    startY = t.clientY;
+  }, { passive: true });
 
-    window.addEventListener('touchmove', (e) => {
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const t = e.changedTouches[i];
-        if (t.identifier === tId) {
-          const dx = t.clientX - startX;
-          const dy = t.clientY - startY;
-          const dist = Math.min(45, Math.hypot(dx, dy));
-          const angle = Math.atan2(dy, dx);
-          const kx = Math.cos(angle) * dist;
-          const ky = Math.sin(angle) * dist;
-          knob.style.transform = `translate(${kx}px, ${ky}px)`;
-          onMove(kx / 45, ky / 45);
-        }
+  window.addEventListener('touchmove', (e) => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      if (t.identifier === moveTouchId) {
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+        const dist = Math.min(42, Math.hypot(dx, dy));
+        const angle = Math.atan2(dy, dx);
+        const kx = Math.cos(angle) * dist;
+        const ky = Math.sin(angle) * dist;
+        knob.style.transform = `translate(${kx}px, ${ky}px)`;
+        player.moveState.right = kx / 42;
+        player.moveState.forward = -(ky / 42);
       }
-    });
+    }
+  }, { passive: true });
 
-    const finish = (e: TouchEvent) => {
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === tId) {
-          tId = null;
-          knob.style.transform = 'translate(0px, 0px)';
-          onEnd();
-        }
+  const resetMoveJoy = (e: TouchEvent) => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === moveTouchId) {
+        moveTouchId = null;
+        knob.style.transform = 'translate(0px, 0px)';
+        player.moveState.right = 0;
+        player.moveState.forward = 0;
       }
-    };
-    window.addEventListener('touchend', finish);
-    window.addEventListener('touchcancel', finish);
-  }
+    }
+  };
+  window.addEventListener('touchend', resetMoveJoy, { passive: true });
+  window.addEventListener('touchcancel', resetMoveJoy, { passive: true });
 
-  setupJoy('joystick-left', 'knob-left', (x, y) => {
-    player.moveState.right = x;
-    player.moveState.forward = -y;
-  }, () => {
-    player.moveState.right = 0;
-    player.moveState.forward = 0;
-  });
+  // 2. Touch Look Zone: Arrastar com os dedos na direita para virar a c?mera
+  const lookZone = document.getElementById('touch-look-zone')!;
+  let lookTouchId: number | null = null;
+  let lastLookX = 0;
+  let lastLookY = 0;
 
-  setupJoy('joystick-right', 'knob-right', (x, y) => {
-    player.rotation.yaw -= x * 0.045;
-    player.rotation.pitch = Math.max(-Math.PI / 2.3, Math.min(Math.PI / 2.3, player.rotation.pitch - y * 0.03));
-  }, () => {});
+  lookZone.addEventListener('touchstart', (e) => {
+    if (isGameOver || isBackpackOpen || camSystem.isViewingCCTV) return;
+    const t = e.changedTouches[0];
+    lookTouchId = t.identifier;
+    lastLookX = t.clientX;
+    lastLookY = t.clientY;
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      if (t.identifier === lookTouchId) {
+        const deltaX = t.clientX - lastLookX;
+        const deltaY = t.clientY - lastLookY;
+        lastLookX = t.clientX;
+        lastLookY = t.clientY;
+
+        // Sensibilidade do deslize nos dedos
+        const sens = 0.0042;
+        player.rotation.yaw -= deltaX * sens;
+        player.rotation.pitch -= deltaY * sens;
+        player.rotation.pitch = Math.max(-Math.PI / 2.3, Math.min(Math.PI / 2.3, player.rotation.pitch));
+      }
+    }
+  }, { passive: true });
+
+  const resetLookTouch = (e: TouchEvent) => {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      if (e.changedTouches[i].identifier === lookTouchId) {
+        lookTouchId = null;
+      }
+    }
+  };
+  window.addEventListener('touchend', resetLookTouch, { passive: true });
+  window.addEventListener('touchcancel', resetLookTouch, { passive: true });
 }
 
 document.getElementById('btn-fullscreen')!.addEventListener('click', () => {
@@ -322,6 +387,7 @@ document.getElementById('btn-fullscreen')!.addEventListener('click', () => {
 
 function startNetworking(roomId: string, isHost: boolean) {
   audio.init();
+  requestAutoLandscapeFullscreen();
   ui.setError('Conectando aos servidores...');
   net.connect(
     roomId,
@@ -363,6 +429,7 @@ document.getElementById('btn-join')!.addEventListener('click', () => {
 
 document.getElementById('btn-solo')!.addEventListener('click', () => {
   audio.init();
+  requestAutoLandscapeFullscreen();
   ui.showHUD('MODO: EXPLORACAO SOLO');
 });
 
@@ -374,7 +441,6 @@ function animate() {
   const date = new Date();
   cctvTime.innerText = date.toTimeString().split(' ')[0];
 
-  // Atualiza portas, arm?rios e itens
   let doorChanged = false;
   map.doors.forEach(d => {
     if (d.update(delta)) doorChanged = true;
@@ -385,7 +451,7 @@ function animate() {
   map.items.forEach(i => i.update(time));
   weapon.update(delta);
 
-  // Raycast de Mira para Intera??es (Itens > Portas > Arm?rios)
+  // Raycast de Mira para Intera??es
   raycaster.setFromCamera(new THREE.Vector2(0, 0), player.camera);
   const activeItems = map.items.filter(i => !i.isCollected).map(i => i.mesh);
   const doorMeshes = map.doors.map(d => d.doorMesh);
@@ -394,6 +460,8 @@ function animate() {
   const itemHits = raycaster.intersectObjects(activeItems, true);
   const doorHits = raycaster.intersectObjects(doorMeshes);
   const cabHits = raycaster.intersectObjects(cabinetMeshes);
+
+  let hasInteractTarget = false;
 
   if (itemHits.length > 0 && itemHits[0].distance < 3.0) {
     let topGroup = itemHits[0].object;
@@ -404,34 +472,51 @@ function animate() {
     targetedDoor = null;
     targetedCabinet = null;
     if (targetedItem) {
+      hasInteractTarget = true;
       ui.showInteract(`[E] PEGAR ${targetedItem.name.toUpperCase()}`);
+      btnTouchInteract.innerText = 'PEGAR';
     }
   } else if (doorHits.length > 0 && doorHits[0].distance < 3.2) {
     targetedDoor = map.doors.find(d => d.doorMesh === doorHits[0].object) || null;
     targetedItem = null;
     targetedCabinet = null;
     if (targetedDoor) {
+      hasInteractTarget = true;
       if (targetedDoor.isLocked) {
         const hasKey = targetedDoor.requiredKey && inventoryKeys.has(targetedDoor.requiredKey);
         if (hasKey) {
           ui.showInteract(`[E] USAR CHAVE E DESTRANCAR`);
+          btnTouchInteract.innerText = 'USAR CHAVE';
         } else {
           ui.showInteract(`[TRANCADA: PRECISA DA ${targetedDoor.requiredKey?.replace('_', ' ').toUpperCase()}]`);
+          btnTouchInteract.innerText = 'TRANCADA';
         }
       } else {
         ui.showInteract(targetedDoor.isOpen ? '[E] FECHAR PORTA' : '[E] ABRIR PORTA');
+        btnTouchInteract.innerText = targetedDoor.isOpen ? 'FECHAR' : 'ABRIR';
       }
     }
   } else if (cabHits.length > 0 && cabHits[0].distance < 3.0) {
     targetedCabinet = map.cabinets.find(c => c.doorMesh === cabHits[0].object) || null;
     targetedItem = null;
     targetedDoor = null;
+    hasInteractTarget = true;
     ui.showInteract(targetedCabinet?.isOpen ? '[E] FECHAR ARM?RIO' : '[E] ABRIR ARM?RIO');
+    btnTouchInteract.innerText = targetedCabinet?.isOpen ? 'FECHAR' : 'ABRIR';
   } else {
     targetedItem = null;
     targetedDoor = null;
     targetedCabinet = null;
     ui.showInteract(null);
+  }
+
+  // No celular: s? exibe o bot?o se estiver apontando para algo interativo
+  if (isTouchDevice) {
+    if (hasInteractTarget && !isBackpackOpen && !camSystem.isViewingCCTV && !isGameOver) {
+      btnTouchInteract.classList.remove('hidden');
+    } else {
+      btnTouchInteract.classList.add('hidden');
+    }
   }
 
   // Luzes de emerg?ncia

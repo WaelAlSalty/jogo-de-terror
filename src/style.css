@@ -5,6 +5,7 @@
   user-select: none;
   -webkit-user-select: none;
   font-family: 'Consolas', 'Courier New', monospace;
+  touch-action: none;
 }
 
 body, html {
@@ -45,6 +46,42 @@ body, html {
   transition: box-shadow 0.2s ease-out;
 }
 
+/* Aviso para girar aparelho se estiver em Portrait */
+#rotate-device-screen {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 4, 3, 0.98);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  pointer-events: auto;
+  text-align: center;
+  padding: 24px;
+}
+
+.rotate-content h2 {
+  color: #ef4444;
+  font-size: 1.5rem;
+  margin: 16px 0 8px;
+  letter-spacing: 2px;
+}
+
+.rotate-content p {
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
+.rotate-phone-icon {
+  font-size: 3rem;
+  animation: pulse-rotate 2s infinite ease-in-out;
+}
+
+@keyframes pulse-rotate {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-90deg); }
+}
+
 #menu-screen {
   position: absolute;
   inset: 0;
@@ -61,58 +98,52 @@ body, html {
   background: rgba(10, 16, 14, 0.85);
   border: 1px solid #1f3d32;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), 0 0 10px rgba(16, 185, 129, 0.1);
-  padding: 36px;
+  padding: 30px;
   border-radius: 6px;
   text-align: center;
 }
 
 .glitch-text {
   color: #ef4444;
-  font-size: 2.2rem;
-  letter-spacing: 5px;
+  font-size: 2rem;
+  letter-spacing: 4px;
   text-shadow: 0 0 15px rgba(239, 68, 68, 0.7);
   margin-bottom: 6px;
 }
 
 .tagline {
   color: #6ee7b7;
-  font-size: 0.85rem;
-  letter-spacing: 2px;
-  margin-bottom: 28px;
+  font-size: 0.8rem;
+  letter-spacing: 1.5px;
+  margin-bottom: 22px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 input[type="text"] {
   width: 100%;
-  padding: 14px;
+  padding: 12px;
   background: rgba(4, 8, 6, 0.9);
   border: 1px solid #1f3d32;
   color: #f9fafb;
-  font-size: 1.1rem;
+  font-size: 1rem;
   text-align: center;
   outline: none;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   border-radius: 4px;
-  transition: border-color 0.2s;
-}
-
-input[type="text"]:focus {
-  border-color: #ef4444;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 .btn-group {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .btn {
   width: 100%;
-  padding: 13px;
+  padding: 12px;
   border: none;
   border-radius: 4px;
   font-weight: 700;
@@ -121,48 +152,23 @@ input[type="text"]:focus {
   transition: all 0.2s;
 }
 
-.btn-primary {
-  background: #b91c1c;
-  color: #ffffff;
-}
-.btn-primary:hover {
-  background: #dc2626;
-  box-shadow: 0 0 15px rgba(220, 38, 38, 0.6);
-}
-
-.btn-secondary {
-  background: #0f2e24;
-  color: #6ee7b7;
-  border: 1px solid #1f5f4b;
-}
-.btn-secondary:hover {
-  background: #144234;
-}
-
-.btn-dark {
-  background: transparent;
-  color: #9ca3af;
-  border: 1px dashed #374151;
-}
-.btn-dark:hover {
-  background: #111827;
-  color: #ffffff;
-}
+.btn-primary { background: #b91c1c; color: #ffffff; }
+.btn-secondary { background: #0f2e24; color: #6ee7b7; border: 1px solid #1f5f4b; }
+.btn-dark { background: transparent; color: #9ca3af; border: 1px dashed #374151; }
 
 #status-message {
-  margin-top: 18px;
-  font-size: 0.85rem;
+  margin-top: 14px;
+  font-size: 0.8rem;
   color: #f87171;
-  min-height: 20px;
 }
 
 #crosshair {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 5px;
-  height: 5px;
-  background-color: rgba(56, 189, 248, 0.8);
+  width: 6px;
+  height: 6px;
+  background-color: rgba(56, 189, 248, 0.9);
   transform: translate(-50%, -50%);
   border-radius: 50%;
   box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
@@ -171,46 +177,44 @@ input[type="text"]:focus {
 #interact-prompt {
   display: none;
   position: absolute;
-  top: 55%;
+  top: 56%;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.85);
   border: 1px solid #38bdf8;
   color: #f3f4f6;
-  padding: 6px 16px;
-  font-size: 0.85rem;
-  letter-spacing: 2px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
   border-radius: 4px;
   text-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
 }
 
 #stats-box {
   position: absolute;
-  top: 24px;
-  left: 24px;
+  top: 16px;
+  left: 16px;
   background: rgba(3, 7, 5, 0.75);
   border-left: 3px solid #38bdf8;
-  padding: 10px 16px;
+  padding: 8px 14px;
   color: #d1d5db;
-  font-size: 0.85rem;
-  line-height: 1.6;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  pointer-events: none;
 }
 
-#ammo-display {
-  color: #38bdf8;
-  font-weight: bold;
-}
+#ammo-display { color: #38bdf8; font-weight: bold; }
+#key-display { color: #facc15; font-weight: bold; }
 
-#key-display {
-  color: #facc15;
-  font-weight: bold;
+/* Bot?es do Desktop */
+#desktop-actions {
+  pointer-events: auto;
 }
 
 .glass-btn {
-  pointer-events: auto;
   position: absolute;
-  top: 24px;
-  right: 24px;
+  top: 16px;
+  right: 16px;
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid #374151;
   color: #e5e7eb;
@@ -220,50 +224,172 @@ input[type="text"]:focus {
 }
 
 .backpack-btn {
-  pointer-events: auto;
   position: absolute;
-  bottom: 24px;
-  left: 24px;
+  bottom: 20px;
+  left: 20px;
   background: rgba(15, 23, 42, 0.85);
   border: 2px solid #10b981;
   color: #6ee7b7;
-  padding: 12px 20px;
+  padding: 10px 18px;
   border-radius: 6px;
   font-weight: bold;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   cursor: pointer;
-}
-
-.backpack-btn:hover {
-  background: #047857;
-  color: #fff;
 }
 
 .cctv-hud-btn {
-  pointer-events: auto;
   position: absolute;
-  bottom: 24px;
-  left: 200px;
+  bottom: 20px;
+  left: 190px;
   background: rgba(15, 23, 42, 0.85);
   border: 2px solid #3b82f6;
   color: #60a5fa;
-  padding: 12px 20px;
+  padding: 10px 18px;
   border-radius: 6px;
   font-weight: bold;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   cursor: pointer;
 }
 
-.cctv-hud-btn:hover {
-  background: #1d4ed8;
-  color: #fff;
+/* ========================================================= */
+/* CONTROLES MOBILE NATIVOS (Limpos, sem excesso)            */
+/* ========================================================= */
+#touch-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none; /* Ativado via JS em dispositivos m?veis */
 }
 
-/* TELA VOC? ESCAPOU */
+/* Joystick Esquerdo (Andar) */
+.joy-zone {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  width: 120px;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  pointer-events: auto;
+}
+
+.joy-knob {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  width: 40px;
+  height: 40px;
+  background: rgba(56, 189, 248, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Touchpad Direito de Olhar: Cobre toda a metade direita livre */
+#touch-look-zone {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 55%;
+  height: 100%;
+  pointer-events: auto;
+  z-index: 15;
+}
+
+/* Painel de A??es Mobile (Acima do touchpad, na lateral direita) */
+.mobile-action-buttons {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.mobile-action-btn {
+  pointer-events: auto;
+  border-radius: 50%;
+  font-weight: bold;
+  letter-spacing: 1px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid;
+}
+
+.shoot-btn {
+  width: 72px;
+  height: 72px;
+  background: rgba(220, 38, 38, 0.75);
+  border-color: #ef4444;
+  color: #fff;
+  font-size: 0.8rem;
+}
+
+.shoot-btn:active {
+  background: #b91c1c;
+  transform: scale(0.95);
+}
+
+/* Bot?o INTERAGIR s? aparece quando a mira toca num objeto */
+.interact-btn {
+  width: 78px;
+  height: 78px;
+  background: rgba(56, 189, 248, 0.8);
+  border-color: #38bdf8;
+  color: #030712;
+  font-size: 0.75rem;
+  animation: pop-pulse 0.3s ease-out;
+}
+
+@keyframes pop-pulse {
+  0% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.bag-btn {
+  width: 54px;
+  height: 54px;
+  background: rgba(16, 185, 129, 0.7);
+  border-color: #10b981;
+  color: #fff;
+  font-size: 0.65rem;
+}
+
+.cctv-btn {
+  width: 54px;
+  height: 54px;
+  background: rgba(59, 130, 246, 0.7);
+  border-color: #3b82f6;
+  color: #fff;
+  font-size: 0.65rem;
+}
+
+/* Quando estiver em celular/touch: esconde bot?es de PC e ajusta a tela */
+@media (hover: none) and (pointer: coarse) {
+  #desktop-actions {
+    display: none !important;
+  }
+  #interact-prompt {
+    display: none !important; /* No celular, usa o bot?o touch grande */
+  }
+  #stats-box {
+    top: 8px;
+    left: 8px;
+    padding: 6px 10px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Modais da Mochila e CCTV */
 #escaped-screen {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.94);
+  background: rgba(0, 0, 0, 0.95);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -273,30 +399,27 @@ input[type="text"]:focus {
 
 .escaped-card {
   text-align: center;
-  max-width: 500px;
-  padding: 40px;
+  max-width: 480px;
+  padding: 30px;
 }
 
 .escaped-title {
   color: #22c55e;
-  font-size: 3rem;
-  letter-spacing: 6px;
-  text-shadow: 0 0 25px rgba(34, 197, 94, 0.8);
-  margin-bottom: 16px;
+  font-size: 2.4rem;
+  letter-spacing: 5px;
+  margin-bottom: 12px;
 }
 
 .escaped-subtitle {
   color: #d1d5db;
-  font-size: 1.1rem;
-  margin-bottom: 30px;
-  line-height: 1.6;
+  font-size: 1rem;
+  margin-bottom: 24px;
 }
 
-/* MODAL DA MOCHILA */
 #backpack-modal {
   position: absolute;
   inset: 0;
-  background: rgba(3, 7, 5, 0.88);
+  background: rgba(3, 7, 5, 0.92);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -306,97 +429,72 @@ input[type="text"]:focus {
 
 .backpack-card {
   width: 90%;
-  max-width: 620px;
+  max-width: 560px;
   background: rgba(10, 16, 14, 0.95);
   border: 1px solid #1f5f4b;
   border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+  padding: 20px;
 }
 
 .backpack-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   border-bottom: 1px solid #1f3d32;
-  padding-bottom: 12px;
+  padding-bottom: 8px;
 }
 
 .backpack-header h2 {
   color: #10b981;
-  font-size: 1.2rem;
-  letter-spacing: 2px;
+  font-size: 1.1rem;
 }
 
 .close-bag-btn {
   background: #991b1b;
   border: none;
   color: white;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: 4px;
   font-weight: bold;
-  cursor: pointer;
 }
 
 .slots-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .slot {
   background: rgba(17, 24, 21, 0.8);
   border: 1px solid #1f3d32;
   border-radius: 6px;
-  padding: 14px;
+  padding: 10px;
   text-align: center;
   position: relative;
 }
 
 .active-slot {
   border-color: #38bdf8;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
 }
 
 .slot-badge {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 4px;
+  right: 4px;
   background: #0284c7;
   color: white;
-  font-size: 0.65rem;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-weight: bold;
+  font-size: 0.55rem;
+  padding: 2px 4px;
+  border-radius: 2px;
 }
 
-.slot-icon {
-  font-size: 2rem;
-  margin-bottom: 6px;
-}
+.slot-icon { font-size: 1.6rem; margin-bottom: 4px; }
+.slot-name { color: #f3f4f6; font-size: 0.75rem; margin-bottom: 2px; }
+.slot-count { color: #9ca3af; font-size: 0.65rem; }
+.bag-tip { color: #9ca3af; font-size: 0.7rem; text-align: center; }
 
-.slot-name {
-  color: #f3f4f6;
-  font-weight: bold;
-  font-size: 0.85rem;
-  margin-bottom: 4px;
-}
-
-.slot-count {
-  color: #9ca3af;
-  font-size: 0.75rem;
-}
-
-.bag-tip {
-  color: #9ca3af;
-  font-size: 0.75rem;
-  text-align: center;
-  font-style: italic;
-}
-
-/* SISTEMA CCTV */
 #cctv-overlay {
   position: absolute;
   inset: 0;
@@ -405,7 +503,7 @@ input[type="text"]:focus {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 30px;
+  padding: 20px;
   box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
 }
 
@@ -422,7 +520,7 @@ input[type="text"]:focus {
   justify-content: space-between;
   align-items: center;
   background: rgba(5, 10, 8, 0.7);
-  padding: 12px 20px;
+  padding: 8px 16px;
   border: 1px solid #1f3d32;
   border-radius: 4px;
 }
@@ -432,155 +530,45 @@ input[type="text"]:focus {
   font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  font-size: 0.8rem;
 }
 
 .rec-dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #ef4444;
-  animation: blink 1s infinite alternate;
-}
-
-@keyframes blink {
-  from { opacity: 0.3; }
-  to { opacity: 1; }
 }
 
 #cctv-cam-title {
   color: #6ee7b7;
-  font-size: 1.1rem;
-  letter-spacing: 2px;
+  font-size: 0.95rem;
 }
 
 #cctv-timestamp {
   color: #9ca3af;
+  font-size: 0.8rem;
 }
 
 .cctv-controls {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 14px;
 }
 
 .cam-btn {
   background: rgba(10, 20, 16, 0.85);
   border: 1px solid #10b981;
   color: #6ee7b7;
-  padding: 12px 24px;
+  padding: 10px 18px;
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
-  letter-spacing: 1.5px;
-}
-
-.cam-btn:hover {
-  background: #10b981;
-  color: #000;
+  font-size: 0.8rem;
 }
 
 .cam-btn-exit {
   border-color: #ef4444;
   color: #f87171;
-}
-
-.cam-btn-exit:hover {
-  background: #ef4444;
-  color: #fff;
-}
-
-/* Mobile */
-#touch-controls {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  pointer-events: auto;
-  display: none;
-}
-
-.joy-zone {
-  position: absolute;
-  bottom: 30px;
-  width: 130px;
-  height: 130px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 2px dashed rgba(255, 255, 255, 0.15);
-  border-radius: 50%;
-}
-
-#joystick-left { left: 30px; }
-#joystick-right { right: 30px; }
-
-.joy-knob {
-  position: absolute;
-  top: 45px;
-  left: 45px;
-  width: 40px;
-  height: 40px;
-  background: rgba(56, 189, 248, 0.5);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-#btn-touch-interact {
-  position: absolute;
-  right: 175px;
-  bottom: 35px;
-  width: 65px;
-  height: 65px;
-  background: rgba(56, 189, 248, 0.6);
-  border: 2px solid #38bdf8;
-  color: white;
-  border-radius: 50%;
-  font-weight: bold;
-  font-size: 0.7rem;
-  cursor: pointer;
-}
-
-#btn-touch-shoot {
-  position: absolute;
-  right: 100px;
-  bottom: 110px;
-  width: 65px;
-  height: 65px;
-  background: rgba(239, 68, 68, 0.7);
-  border: 2px solid #ef4444;
-  color: white;
-  border-radius: 50%;
-  font-weight: bold;
-  font-size: 0.75rem;
-  cursor: pointer;
-}
-
-#btn-touch-bag {
-  position: absolute;
-  right: 175px;
-  bottom: 110px;
-  width: 65px;
-  height: 65px;
-  background: rgba(16, 185, 129, 0.6);
-  border: 2px solid #10b981;
-  color: white;
-  border-radius: 50%;
-  font-weight: bold;
-  font-size: 0.7rem;
-  cursor: pointer;
-}
-
-#btn-touch-cctv {
-  position: absolute;
-  right: 250px;
-  bottom: 35px;
-  width: 65px;
-  height: 65px;
-  background: rgba(59, 130, 246, 0.6);
-  border: 2px solid #3b82f6;
-  color: white;
-  border-radius: 50%;
-  font-weight: bold;
-  font-size: 0.75rem;
-  cursor: pointer;
 }

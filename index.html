@@ -2,16 +2,25 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <link rel="icon" href="data:,">
     <title>Specimen Zero - Web Reborn</title>
-    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="./src/style.css" />
   </head>
   <body>
     <div id="game-container"></div>
 
     <div id="ui-overlay">
       <div id="danger-vignette"></div>
+
+      <!-- Aviso para girar a tela no celular se estiver em p? -->
+      <div id="rotate-device-screen" class="hidden">
+        <div class="rotate-content">
+          <div class="rotate-phone-icon">?? ? ??</div>
+          <h2>GIRE O CELULAR</h2>
+          <p>Para jogar com imers?o total, use o aparelho na horizontal.</p>
+        </div>
+      </div>
 
       <!-- HUD em jogo -->
       <div id="hud" class="hidden">
@@ -25,21 +34,30 @@
           <div id="threat-level">AMEA?A: NORMAL</div>
         </div>
 
-        <button id="btn-fullscreen" class="glass-btn">TELA CHEIA</button>
-        <button id="btn-backpack" class="backpack-btn">MOCHILA [TAB]</button>
-        <button id="btn-toggle-cctv" class="cctv-hud-btn">CAMERAS [C]</button>
+        <!-- Bot?es de Desktop (Ocultos automaticamente em celular) -->
+        <div id="desktop-actions">
+          <button id="btn-fullscreen" class="glass-btn">TELA CHEIA</button>
+          <button id="btn-backpack" class="backpack-btn">MOCHILA [TAB]</button>
+          <button id="btn-toggle-cctv" class="cctv-hud-btn">CAMERAS [C]</button>
+        </div>
 
+        <!-- Controles Mobile Otimizados -->
         <div id="touch-controls">
+          <!-- Zona esquerda: Joystick de Movimento -->
           <div id="joystick-left" class="joy-zone">
             <div id="knob-left" class="joy-knob"></div>
           </div>
-          <div id="joystick-right" class="joy-zone">
-            <div id="knob-right" class="joy-knob"></div>
+
+          <!-- Zona direita: Touchpad Invis?vel de Olhar -->
+          <div id="touch-look-zone"></div>
+
+          <!-- Bot?es Touch Funcionais -->
+          <div class="mobile-action-buttons">
+            <button id="btn-touch-shoot" class="mobile-action-btn shoot-btn">ATIRAR</button>
+            <button id="btn-touch-interact" class="mobile-action-btn interact-btn hidden">INTERAGIR</button>
+            <button id="btn-touch-bag" class="mobile-action-btn bag-btn">MOCHILA</button>
+            <button id="btn-touch-cctv" class="mobile-action-btn cctv-btn">CCTV</button>
           </div>
-          <button id="btn-touch-interact">INTERAGIR</button>
-          <button id="btn-touch-shoot">ATIRAR</button>
-          <button id="btn-touch-bag">MOCHILA</button>
-          <button id="btn-touch-cctv">CCTV</button>
         </div>
       </div>
 
@@ -52,12 +70,12 @@
         </div>
       </div>
 
-      <!-- MOCHILA / INVENT?RIO T?TICO (TAB) -->
+      <!-- MOCHILA / INVENT?RIO T?TICO -->
       <div id="backpack-modal" class="hidden">
         <div class="backpack-card">
           <div class="backpack-header">
             <h2>INVENT?RIO DE FUGA</h2>
-            <button id="btn-close-bag" class="close-bag-btn">FECHAR [TAB/ESC]</button>
+            <button id="btn-close-bag" class="close-bag-btn">FECHAR</button>
           </div>
           <div class="slots-grid">
             <div class="slot active-slot">
@@ -102,8 +120,8 @@
 
         <div class="cctv-controls">
           <button id="btn-cam-prev" class="cam-btn">&lt; ANTERIOR</button>
-          <button id="btn-cam-exit" class="cam-btn cam-btn-exit">VOLTAR AO JOGADOR [C / ESC]</button>
-          <button id="btn-cam-next" class="cam-btn">PROXIMA &gt;</button>
+          <button id="btn-cam-exit" class="cam-btn cam-btn-exit">VOLTAR AO JOGADOR</button>
+          <button id="btn-cam-next" class="cam-btn">PR?XIMA &gt;</button>
         </div>
       </div>
 
@@ -128,6 +146,6 @@
       </div>
     </div>
 
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
