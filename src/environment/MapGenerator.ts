@@ -103,8 +103,8 @@ export class MapGenerator {
     const masterKey = new CollectibleItem('master_key', 'Chave Mestra da Saida', 'master_key', -12.1, 1.25, -5.5, this.scene, this.audio);
     this.items.push(masterKey);
 
-    // Personagem importada / instanciada na Sala de Cirurgia (ao lado da mesa de cirurgia)
-    this.character = new CharacterLoader(-6.2, 0, -7.8, Math.PI / 4, this.scene, this.audio, this.colliders);
+    // Posicionada na Sala de Cirurgia, nivelada com o ch?o e virada em dire??o ? entrada
+    this.character = new CharacterLoader(-6.5, 0, -6.5, Math.PI / 3, this.scene, this.audio, this.colliders);
 
     // Enfermaria
     FurnitureBuilder.createHospitalBed(-10.5, 4.5, Math.PI / 2, this.scene, this.colliders);
@@ -127,7 +127,7 @@ export class MapGenerator {
     this.cabinets.push(cabVest);
 
     // Luzes locais
-    const surgLight = new THREE.PointLight(0x38bdf8, 2.2, 12);
+    const surgLight = new THREE.PointLight(0x38bdf8, 2.4, 12);
     surgLight.position.set(-8.5, 2.9, -5.5);
     this.scene.add(surgLight);
 
