@@ -39,8 +39,8 @@ const raycaster = new THREE.Raycaster();
 let targetedDoor: Door | null = null;
 let targetedCabinet: InteractiveCabinet | null = null;
 let targetedItem: CollectibleItem | null = null;
+let isTargetingCharacter = false;
 
-// Elementos da Interface
 const backpackModal = document.getElementById('backpack-modal')!;
 const btnBackpack = document.getElementById('btn-backpack')!;
 const btnCloseBag = document.getElementById('btn-close-bag')!;
@@ -70,13 +70,11 @@ if (isTouchDevice) {
   touchControls.style.display = 'block';
 }
 
-// 1. AUTO FULLSCREEN & ORIENTA??O HORIZONTAL (Landscape)
 async function requestAutoLandscapeFullscreen() {
   try {
     if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
       await document.documentElement.requestFullscreen().catch(() => {});
     }
-    // Trava em modo paisagem se a API estiver dispon?vel no navegador
     if (screen.orientation && 'lock' in screen.orientation) {
       // @ts-ignore
       await screen.orientation.lock('landscape').catch(() => {});
@@ -102,8 +100,8 @@ checkOrientation();
 function updateKeyHUD() {
   const keysList: string[] = [];
   if (inventoryKeys.has('red_key')) keysList.push('Cirurgia');
-  if (inventoryKeys.has('card_key')) keysList.push('Farm?cia');
-  if (inventoryKeys.has('master_key')) keysList.push('SA?DA');
+  if (inventoryKeys.has('card_key')) keysList.push('Farmacia');
+  if (inventoryKeys.has('master_key')) keysList.push('SAIDA');
   keyDisplay.innerText = `CHAVES: ${keysList.length > 0 ? keysList.join(', ') : 'NENHUMA'}`;
 
   const slotRed = document.getElementById('status-red-key')!;
@@ -177,6 +175,14 @@ btnCamPrev.addEventListener('click', () => {
 function tryInteract() {
   if (isGameOver) return;
 
+  // Interacao com a Personagem
+  if (isTargetingCharacter && map.character) {
+    const speech = map.character.interact();
+    ui.showInteract(speech);
+    return;
+  }
+
+  // Coleta de Item
   if (targetedItem && !targetedItem.isCollected) {
     inventoryKeys.add(targetedItem.type);
     targetedItem.collect(engine.scene);
@@ -184,6 +190,7 @@ function tryInteract() {
     return;
   }
 
+  // Porta
   if (targetedDoor) {
     if (targetedDoor.isLocked) {
       if (targetedDoor.requiredKey && inventoryKeys.has(targetedDoor.requiredKey)) {
@@ -206,6 +213,7 @@ function tryInteract() {
     return;
   }
 
+  // Armario
   if (targetedCabinet) {
     targetedCabinet.toggle();
     return;
@@ -231,7 +239,6 @@ btnTouchInteract.addEventListener('click', (e) => {
   tryInteract();
 });
 
-// Teclado (PC)
 window.addEventListener('keydown', (e) => {
   if (isGameOver) return;
   if (e.code === 'Tab') { e.preventDefault(); toggleBackpack(); return; }
@@ -255,7 +262,6 @@ window.addEventListener('keyup', (e) => {
   if (['KeyA', 'KeyD', 'ArrowLeft', 'ArrowRight'].includes(e.code)) player.moveState.right = 0;
 });
 
-// Mouse (PC)
 engine.renderer.domElement.addEventListener('mousedown', (e) => {
   if (isTouchDevice || isGameOver || isBackpackOpen || camSystem.isViewingCCTV) return;
   if (ui.menuScreen.classList.contains('hidden')) {
@@ -265,7 +271,7 @@ engine.renderer.domElement.addEventListener('mousedown', (e) => {
       return;
     }
     if (e.button === 0) {
-      if (targetedItem || targetedDoor || targetedCabinet) {
+      if (isTargetingCharacter || targetedItem || targetedDoor || targetedCabinet) {
         tryInteract();
       } else {
         handleShoot();
@@ -285,11 +291,7 @@ document.addEventListener('mousemove', (e) => {
   player.rotation.pitch = Math.max(-Math.PI / 2.3, Math.min(Math.PI / 2.3, player.rotation.pitch));
 });
 
-// =========================================================
-// SISTEMA TOUCH NATIVO (Mobile)
-// =========================================================
 if (isTouchDevice) {
-  // 1. Joystick Esquerdo: Movimenta??o
   const joyZone = document.getElementById('joystick-left')!;
   const knob = document.getElementById('knob-left')!;
   let moveTouchId: number | null = null;
@@ -334,7 +336,6 @@ if (isTouchDevice) {
   window.addEventListener('touchend', resetMoveJoy, { passive: true });
   window.addEventListener('touchcancel', resetMoveJoy, { passive: true });
 
-  // 2. Touch Look Zone: Arrastar com os dedos na direita para virar a c?mera
   const lookZone = document.getElementById('touch-look-zone')!;
   let lookTouchId: number | null = null;
   let lastLookX = 0;
@@ -357,7 +358,6 @@ if (isTouchDevice) {
         lastLookX = t.clientX;
         lastLookY = t.clientY;
 
-        // Sensibilidade do deslize nos dedos
         const sens = 0.0042;
         player.rotation.yaw -= deltaX * sens;
         player.rotation.pitch -= deltaY * sens;
@@ -449,9 +449,10 @@ function animate() {
 
   map.cabinets.forEach(c => c.update(delta));
   map.items.forEach(i => i.update(time));
+  if (map.character) map.character.update(delta);
   weapon.update(delta);
 
-  // Raycast de Mira para Intera??es
+  // Raycast de Mira para Interacoes
   raycaster.setFromCamera(new THREE.Vector2(0, 0), player.camera);
   const activeItems = map.items.filter(i => !i.isCollected).map(i => i.mesh);
   const doorMeshes = map.doors.map(d => d.doorMesh);
@@ -460,10 +461,20 @@ function animate() {
   const itemHits = raycaster.intersectObjects(activeItems, true);
   const doorHits = raycaster.intersectObjects(doorMeshes);
   const cabHits = raycaster.intersectObjects(cabinetMeshes);
+  const charHits = map.character ? raycaster.intersectObject(map.character.mesh, true) : [];
 
   let hasInteractTarget = false;
 
-  if (itemHits.length > 0 && itemHits[0].distance < 3.0) {
+  if (charHits.length > 0 && charHits[0].distance < 3.2) {
+    isTargetingCharacter = true;
+    targetedItem = null;
+    targetedDoor = null;
+    targetedCabinet = null;
+    hasInteractTarget = true;
+    ui.showInteract('[E] FALAR COM A SOBREVIVENTE');
+    btnTouchInteract.innerText = 'FALAR';
+  } else if (itemHits.length > 0 && itemHits[0].distance < 3.0) {
+    isTargetingCharacter = false;
     let topGroup = itemHits[0].object;
     while (topGroup.parent && !topGroup.userData.isCollectible) {
       topGroup = topGroup.parent as THREE.Mesh;
@@ -477,6 +488,7 @@ function animate() {
       btnTouchInteract.innerText = 'PEGAR';
     }
   } else if (doorHits.length > 0 && doorHits[0].distance < 3.2) {
+    isTargetingCharacter = false;
     targetedDoor = map.doors.find(d => d.doorMesh === doorHits[0].object) || null;
     targetedItem = null;
     targetedCabinet = null;
@@ -497,20 +509,21 @@ function animate() {
       }
     }
   } else if (cabHits.length > 0 && cabHits[0].distance < 3.0) {
+    isTargetingCharacter = false;
     targetedCabinet = map.cabinets.find(c => c.doorMesh === cabHits[0].object) || null;
     targetedItem = null;
     targetedDoor = null;
     hasInteractTarget = true;
-    ui.showInteract(targetedCabinet?.isOpen ? '[E] FECHAR ARM?RIO' : '[E] ABRIR ARM?RIO');
+    ui.showInteract(targetedCabinet?.isOpen ? '[E] FECHAR ARMARIO' : '[E] ABRIR ARMARIO');
     btnTouchInteract.innerText = targetedCabinet?.isOpen ? 'FECHAR' : 'ABRIR';
   } else {
+    isTargetingCharacter = false;
     targetedItem = null;
     targetedDoor = null;
     targetedCabinet = null;
     ui.showInteract(null);
   }
 
-  // No celular: s? exibe o bot?o se estiver apontando para algo interativo
   if (isTouchDevice) {
     if (hasInteractTarget && !isBackpackOpen && !camSystem.isViewingCCTV && !isGameOver) {
       btnTouchInteract.classList.remove('hidden');
@@ -519,7 +532,6 @@ function animate() {
     }
   }
 
-  // Luzes de emerg?ncia
   const flicker = Math.sin(time * 7) + Math.sin(time * 19);
   const isFlickering = flicker > 1.3;
   map.emergencyLights.forEach(light => {

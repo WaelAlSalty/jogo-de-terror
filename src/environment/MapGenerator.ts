@@ -6,6 +6,7 @@ import { CameraSystem } from '../core/CameraSystem';
 import { FurnitureBuilder } from './FurnitureBuilder';
 import { InteractiveCabinet } from '../entities/InteractiveCabinet';
 import { CollectibleItem } from '../entities/CollectibleItem';
+import { CharacterLoader } from '../entities/CharacterLoader';
 
 export class MapGenerator {
   public colliders: THREE.Box3[] = [];
@@ -13,6 +14,7 @@ export class MapGenerator {
   public doors: Door[] = [];
   public cabinets: InteractiveCabinet[] = [];
   public items: CollectibleItem[] = [];
+  public character: CharacterLoader | null = null;
   public spawnPosition: THREE.Vector3 = new THREE.Vector3(0, 1.6, 2);
 
   constructor(private scene: THREE.Scene, private audio: AudioManager, private camSystem: CameraSystem) {}
@@ -51,7 +53,7 @@ export class MapGenerator {
     // Limites Externos
     this.createWall(0, -11, w, 0.3, h, wallMat);
 
-    // Parede Sul com Porta de Sa?da Central
+    // Parede Sul com Porta de Saida
     this.createWall(-7, 11, 12, 0.3, h, wallMat);
     this.createWall(7, 11, 12, 0.3, h, wallMat);
     const exitDoor = new Door('door_exit', 0, 11, 0, this.scene, this.audio, wallMat, true, 'master_key', true);
@@ -60,17 +62,17 @@ export class MapGenerator {
     this.createWall(-13, 0, 0.3, d, h, wallMat);
     this.createWall(13, 0, 0.3, d, h, wallMat);
 
-    // Divis?rias do Corredor Central (4 metros de largura livre)
+    // Divisorias do Corredor Central (4 metros de largura)
     this.createWall(-4, 7, 0.3, 8, h, wallMat);
     this.createWall(-4, -7, 0.3, 8, h, wallMat);
     this.createWall(4, 7, 0.3, 8, h, wallMat);
     this.createWall(4, -7, 0.3, 8, h, wallMat);
 
-    // Divis?rias Horizontais dos Quartos
+    // Divisorias Horizontais
     this.createWall(-8.5, 0, 9, 0.3, h, wallMat);
     this.createWall(8.5, 0, 9, 0.3, h, wallMat);
 
-    // Portas nos v?os centrais
+    // Portas nos vaos
     const doorSurg = new Door('door_cirurgia', -4, -1.5, Math.PI / 2, this.scene, this.audio, wallMat, true, 'red_key');
     this.doors.push(doorSurg);
 
@@ -83,12 +85,12 @@ export class MapGenerator {
     const doorVest = new Door('door_vestiario', 4, 1.5, Math.PI / 2, this.scene, this.audio, wallMat, false, null);
     this.doors.push(doorVest);
 
-    // Mob?lias e Itens
+    // Recepcao
     FurnitureBuilder.createOfficeDeskWithPC(0, -6, Math.PI, this.scene, this.colliders);
     const cabLobby = new InteractiveCabinet('cab_lobby', -2, -10.3, 0, this.scene, this.audio, this.colliders);
     this.cabinets.push(cabLobby);
 
-    // Cirurgia
+    // Sala de Cirurgia
     const metalMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
     const surgTable = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.85, 2.6), metalMat);
     surgTable.position.set(-8.5, 0.42, -5.5);
@@ -98,30 +100,33 @@ export class MapGenerator {
     const cabSurg = new InteractiveCabinet('cab_surg', -12.3, -5.5, Math.PI / 2, this.scene, this.audio, this.colliders);
     this.cabinets.push(cabSurg);
 
-    const masterKey = new CollectibleItem('master_key', 'Chave Mestra da Sa?da', 'master_key', -12.1, 1.25, -5.5, this.scene, this.audio);
+    const masterKey = new CollectibleItem('master_key', 'Chave Mestra da Saida', 'master_key', -12.1, 1.25, -5.5, this.scene, this.audio);
     this.items.push(masterKey);
+
+    // Personagem importada / instanciada na Sala de Cirurgia (ao lado da mesa de cirurgia)
+    this.character = new CharacterLoader(-6.2, 0, -7.8, Math.PI / 4, this.scene, this.audio, this.colliders);
 
     // Enfermaria
     FurnitureBuilder.createHospitalBed(-10.5, 4.5, Math.PI / 2, this.scene, this.colliders);
     FurnitureBuilder.createHospitalBed(-10.5, 7.5, Math.PI / 2, this.scene, this.colliders);
     FurnitureBuilder.createLockersRow(-12.4, 2, Math.PI / 2, this.scene, this.colliders);
 
-    const cardKey = new CollectibleItem('card_key', 'Cart?o da Farm?cia', 'card_key', -10.5, 0.9, 4.5, this.scene, this.audio);
+    const cardKey = new CollectibleItem('card_key', 'Cartao da Farmacia', 'card_key', -10.5, 0.9, 4.5, this.scene, this.audio);
     this.items.push(cardKey);
 
-    // Farm?cia
+    // Farmacia
     const cabPharm = new InteractiveCabinet('cab_pharm', 12.3, -5.5, -Math.PI / 2, this.scene, this.audio, this.colliders);
     this.cabinets.push(cabPharm);
 
     const redKey = new CollectibleItem('red_key', 'Chave Vermelha de Cirurgia', 'red_key', 8.5, 1.2, -10.2, this.scene, this.audio);
     this.items.push(redKey);
 
-    // Vesti?rio
+    // Vestiario
     FurnitureBuilder.createLockersRow(8.5, 10.3, 0, this.scene, this.colliders);
     const cabVest = new InteractiveCabinet('cab_vest', 12.3, 5.5, -Math.PI / 2, this.scene, this.audio, this.colliders);
     this.cabinets.push(cabVest);
 
-    // Ilumina??o Local
+    // Luzes locais
     const surgLight = new THREE.PointLight(0x38bdf8, 2.2, 12);
     surgLight.position.set(-8.5, 2.9, -5.5);
     this.scene.add(surgLight);
@@ -131,42 +136,12 @@ export class MapGenerator {
     this.scene.add(exitLight);
     this.emergencyLights.push(exitLight);
 
-    // ====================================================================
-    // C?MARAS DE SEGURAN?A CCTV (Posi??es e miras calibradas)
-    // ====================================================================
+    // Cameras CCTV
     this.camSystem.cameras = [];
-
-    // CAM 01: Sagu?o Central -> Instalada na parede norte alta, mirando para o centro do sagu?o e sa?da
-    this.camSystem.addCamera(
-      'cam_1',
-      'CAM 01 // SAGU?O & SA?DA',
-      new THREE.Vector3(0, 2.95, -10.2),
-      new THREE.Vector3(0, 1.0, 3.0)
-    );
-
-    // CAM 02: Sala Cir?rgica -> No canto noroeste alto, mirando na maca de aut?psia e arm?rio
-    this.camSystem.addCamera(
-      'cam_2',
-      'CAM 02 // SALA CIR?RGICA',
-      new THREE.Vector3(-12.2, 2.95, -10.2),
-      new THREE.Vector3(-7.5, 0.6, -4.5)
-    );
-
-    // CAM 03: Enfermaria -> No canto sudoeste alto, cobrindo ambas as camas e o corredor
-    this.camSystem.addCamera(
-      'cam_3',
-      'CAM 03 // ENFERMARIA',
-      new THREE.Vector3(-12.2, 2.95, 10.2),
-      new THREE.Vector3(-7.5, 0.8, 4.5)
-    );
-
-    // CAM 04: Farm?cia -> No canto nordeste alto, cobrindo as estantes de rem?dios e a entrada
-    this.camSystem.addCamera(
-      'cam_4',
-      'CAM 04 // FARM?CIA',
-      new THREE.Vector3(12.2, 2.95, -10.2),
-      new THREE.Vector3(7.5, 0.7, -4.5)
-    );
+    this.camSystem.addCamera('cam_1', 'CAM 01 // SAGUAO & SAIDA', new THREE.Vector3(0, 2.95, -10.2), new THREE.Vector3(0, 1.0, 3.0));
+    this.camSystem.addCamera('cam_2', 'CAM 02 // SALA CIRURGICA', new THREE.Vector3(-12.2, 2.95, -10.2), new THREE.Vector3(-7.5, 0.6, -4.5));
+    this.camSystem.addCamera('cam_3', 'CAM 03 // ENFERMARIA', new THREE.Vector3(-12.2, 2.95, 10.2), new THREE.Vector3(-7.5, 0.8, 4.5));
+    this.camSystem.addCamera('cam_4', 'CAM 04 // FARMACIA', new THREE.Vector3(12.2, 2.95, -10.2), new THREE.Vector3(7.5, 0.7, -4.5));
 
     this.scene.updateMatrixWorld(true);
     this.rebuildColliders();
