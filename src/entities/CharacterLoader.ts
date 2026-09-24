@@ -5,8 +5,11 @@ import { AudioManager } from '../core/AudioManager';
 export class CharacterLoader {
   public mesh: THREE.Group;
   public isInteracted: boolean = false;
+  public name: string = 'Dra. Elena';
+  public role: string = 'PESQUISADORA';
   private audio: AudioManager;
   private mixer: THREE.AnimationMixer | null = null;
+  private nameplateSprite!: THREE.Sprite;
 
   constructor(
     x: number,
@@ -15,8 +18,10 @@ export class CharacterLoader {
     rotY: number,
     scene: THREE.Scene,
     audio: AudioManager,
-    colliders: THREE.Box3[]
+    colliders: THREE.Box3[],
+    characterName: string = 'Dra. Elena'
   ) {
+    this.name = characterName;
     this.audio = audio;
     this.mesh = new THREE.Group();
     this.mesh.position.set(x, y, z);
@@ -25,27 +30,32 @@ export class CharacterLoader {
 
     scene.add(this.mesh);
 
+    // Cria a placa de nome 3D flutuante (Sprite)
+    this.createNameplate();
+
     const loader = new GLTFLoader();
     loader.load(
       './character.glb',
       (gltf) => {
-        while (this.mesh.children.length > 0) {
-          this.mesh.remove(this.mesh.children[0]);
-        }
+        // Remove manequim de fallback se existir (mantendo a placa de nome)
+        const toRemove = this.mesh.children.filter(c => c !== this.nameplateSprite);
+        toRemove.forEach(c => this.mesh.remove(c));
 
         const model = gltf.scene;
 
-        // Calcula os limites reais da geometria para levantar os p?s at? o piso
         model.updateMatrixWorld(true);
         const box = new THREE.Box3().setFromObject(model);
         const minY = box.min.y;
+        const height = box.max.y - box.min.y;
 
-        // Se o modelo estiver afundado no piso, desloca para cima
+        // Nivelamento no chao
         if (minY < 0) {
           model.position.y = -minY;
         }
 
-        // Garante que o modelo fique em p? sobre o ch?o e vis?vel por inteiro
+        // Posiciona a placa logo acima da cabeca da personagem
+        this.nameplateSprite.position.y = Math.max(1.9, height + 0.25);
+
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
             child.castShadow = true;
@@ -70,6 +80,41 @@ export class CharacterLoader {
         colliders.push(new THREE.Box3().setFromObject(this.mesh));
       }
     );
+  }
+
+  private createNameplate(): void {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 160;
+    const ctx = canvas.getContext('2d')!;
+
+    // Fundo do cracha medico
+    ctx.fillStyle = 'rgba(10, 20, 16, 0.85)';
+    ctx.roundRect(10, 10, 492, 140, 16);
+    ctx.fill();
+
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 4;
+    ctx.roundRect(10, 10, 492, 140, 16);
+    ctx.stroke();
+
+    // Texto do Nome
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 44px Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(this.name.toUpperCase(), 256, 68);
+
+    // Subtitulo / Funcao
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 26px Consolas, monospace';
+    ctx.fillText(`[ ${this.role} ]`, 256, 114);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    this.nameplateSprite = new THREE.Sprite(spriteMat);
+    this.nameplateSprite.position.set(0, 2.0, 0);
+    this.nameplateSprite.scale.set(1.5, 0.5, 1.0);
+    this.mesh.add(this.nameplateSprite);
   }
 
   private buildFallbackModel(): void {
@@ -107,7 +152,7 @@ export class CharacterLoader {
     legL.userData.isCharacter = true;
     this.mesh.add(legL);
 
-    const legR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.65, clothMat));
+    const legR = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.65, 8), clothMat);
     legR.position.set(0.1, 0.35, 0.1);
     legR.rotation.x = 0.2;
     legR.userData.isCharacter = true;
@@ -128,12 +173,16 @@ export class CharacterLoader {
 
   public interact(): string {
     this.isInteracted = true;
-    return 'SOBREVIVENTE: "Cuidado... a chave da saida esta trancada no armario de cirurgia!"';
+    return `${this.name.toUpperCase()}: "Voc? conseguiu entrar! A chave mestra da sa?da est? escondida no arm?rio de cirurgia... pegue e vamos embora!"`;
   }
 
-  public update(delta: number): void {
+  public update(delta: number, time: number): void {
     if (this.mixer) {
       this.mixer.update(delta);
+    }
+    // Levita??o suave do crach?
+    if (this.nameplateSprite) {
+      this.nameplateSprite.position.y += Math.sin(time * 3) * 0.0006;
     }
   }
 }

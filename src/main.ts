@@ -175,14 +175,12 @@ btnCamPrev.addEventListener('click', () => {
 function tryInteract() {
   if (isGameOver) return;
 
-  // Interacao com a Personagem
   if (isTargetingCharacter && map.character) {
     const speech = map.character.interact();
     ui.showInteract(speech);
     return;
   }
 
-  // Coleta de Item
   if (targetedItem && !targetedItem.isCollected) {
     inventoryKeys.add(targetedItem.type);
     targetedItem.collect(engine.scene);
@@ -190,7 +188,6 @@ function tryInteract() {
     return;
   }
 
-  // Porta
   if (targetedDoor) {
     if (targetedDoor.isLocked) {
       if (targetedDoor.requiredKey && inventoryKeys.has(targetedDoor.requiredKey)) {
@@ -213,7 +210,6 @@ function tryInteract() {
     return;
   }
 
-  // Armario
   if (targetedCabinet) {
     targetedCabinet.toggle();
     return;
@@ -449,10 +445,9 @@ function animate() {
 
   map.cabinets.forEach(c => c.update(delta));
   map.items.forEach(i => i.update(time));
-  if (map.character) map.character.update(delta);
+  if (map.character) map.character.update(delta, time);
   weapon.update(delta);
 
-  // Raycast de Mira para Interacoes
   raycaster.setFromCamera(new THREE.Vector2(0, 0), player.camera);
   const activeItems = map.items.filter(i => !i.isCollected).map(i => i.mesh);
   const doorMeshes = map.doors.map(d => d.doorMesh);
@@ -465,14 +460,14 @@ function animate() {
 
   let hasInteractTarget = false;
 
-  if (charHits.length > 0 && charHits[0].distance < 3.2) {
+  if (charHits.length > 0 && charHits[0].distance < 3.2 && map.character) {
     isTargetingCharacter = true;
     targetedItem = null;
     targetedDoor = null;
     targetedCabinet = null;
     hasInteractTarget = true;
-    ui.showInteract('[E] FALAR COM A SOBREVIVENTE');
-    btnTouchInteract.innerText = 'FALAR';
+    ui.showInteract(`[E] FALAR COM ${map.character.name.toUpperCase()}`);
+    btnTouchInteract.innerText = `FALAR COM ${map.character.name.toUpperCase()}`;
   } else if (itemHits.length > 0 && itemHits[0].distance < 3.0) {
     isTargetingCharacter = false;
     let topGroup = itemHits[0].object;
